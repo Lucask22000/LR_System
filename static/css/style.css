@@ -3,16 +3,16 @@
    ======================================== */
 
 :root {
-    --primary: #4CAF50;
-    --primary-dark: #45a049;
-    --secondary: #008CBA;
-    --success: #449D44;
-    --danger: #D9534F;
-    --warning: #EC971F;
-    --info: #5BC0DE;
-    --light: #F5F5F5;
-    --dark: #333333;
-    --border: #ddd;
+    --primary: #667eea;
+    --primary-dark: #5568d3;
+    --secondary: #764ba2;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #17a2b8;
+    --light: #f8f9fa;
+    --dark: #343a40;
+    --border: #dee2e6;
     --shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -28,7 +28,7 @@ html, body {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
     color: var(--dark);
     line-height: 1.6;
 }
@@ -325,7 +325,7 @@ body {
 }
 
 .btn-secondary:hover {
-    background-color: #0078a0;
+    background-color: #653a7f;
 }
 
 .btn-success, .btn-small.btn-success {
@@ -334,7 +334,7 @@ body {
 }
 
 .btn-success:hover {
-    background-color: #3d8b40;
+    background-color: #218838;
 }
 
 .btn-warning, .btn-small.btn-warning {
@@ -343,7 +343,7 @@ body {
 }
 
 .btn-warning:hover {
-    background-color: #d58512;
+    background-color: #e0a800;
 }
 
 .btn-danger, .btn-small.btn-danger {
@@ -352,7 +352,7 @@ body {
 }
 
 .btn-danger:hover {
-    background-color: #c9302c;
+    background-color: #c82333;
 }
 
 .btn-info, .btn-small.btn-info {
@@ -361,7 +361,7 @@ body {
 }
 
 .btn-info:hover {
-    background-color: #46b8da;
+    background-color: #138496;
 }
 
 .btn-outline {
@@ -428,7 +428,7 @@ body {
 .input-text:focus, .input-select:focus, .input-textarea:focus, .input-search:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .input-textarea {
