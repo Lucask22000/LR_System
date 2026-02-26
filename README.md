@@ -76,12 +76,31 @@ python app.py
 ### 3. Primeiro acesso
 
 - O banco de dados SQLite será criado automaticamente
+- **Primeira vez**: Você será direcionado para criar a conta do administrador
 - Comece criando categorias de produtos
 - Cadastre seus produtos
 - Registre movimentações de estoque
 - Configure caixas e mesas para iniciar vendas
 - Abra pedidos e acompanhe vendas
 - Acompanhe relatórios e alertas
+
+### 🔐 Autenticação e Controle de Acesso
+
+O SystemLR agora oferece um sistema completo de autenticação com controle de acesso por função (role-based).
+
+#### Roles Disponíveis:
+- **🔴 Admin** - Acesso total ao sistema, gerenciamento de funcionários
+- **🟠 Gerente** - Acesso a vendas, pedidos, relatórios e gerenciamento de operadores/caixas
+- **🟡 Caixa** - Acesso a vendas, pedidos e movimentação de estoque
+- **🟢 Operador** - Acesso limitado a movimentação de estoque e leitura de relatórios
+
+#### Login/Registro:
+1. **Primeira vez**: Crie a conta do administrador em `/registro`
+2. **Novos funcionários**: Admin cria conta em `Funcionários → Novo Funcionário`
+3. **Login**: Acesse `/login` com email e senha
+
+#### Proteger Rotas:
+Todas as rotas do sistema (exceto login/registro) requerem autenticação. Tente acessar qualquer página sem logar e será redirecionado para o login.
 
 ## 📁 Estrutura do Projeto
 
@@ -93,14 +112,31 @@ conveniencia/
 ├── requirements.txt       # Dependências do projeto
 ├── templates/             # Arquivos HTML
 │   ├── base.html          # Template base
-│   ├── index.html         # Dashboard
-│   ├── produtos.html      # Lista de produtos
-│   ├── novo_produto.html  # Formulário novo produto
-│   ├── editar_produto.html    # Formulário editar
-│   ├── visualizar_produto.html # Detalhes do produto
-│   ├── categorias.html    # Gerenciamento de categorias
-│   ├── movimentacoes.html # Histórico de movimentações
-│   ├── relatorios.html    # Relatórios
+│   ├── sistema/           # Autenticação e sistema
+│   │   ├── boas_vindas.html
+│   │   ├── login.html     # Login
+│   │   └── registro.html  # Registro de novo usuário
+│   ├── funcionarios/      # Gerenciamento de funcionários (admin/gerente)
+│   │   ├── listar.html
+│   │   ├── criar.html
+│   │   └── editar.html
+│   ├── dashboard/         # Dashboard principal
+│   │   └── index.html
+│   ├── produtos/          # CRUD de produtos
+│   │   ├── produtos.html
+│   │   ├── novo_produto.html
+│   │   ├── editar_produto.html
+│   │   └── visualizar_produto.html
+│   ├── categorias/        # CRUD de categorias
+│   │   ├── categorias.html
+│   │   ├── nova_categoria.html
+│   │   └── editar_categoria.html
+│   ├── movimentacoes/     # Histórico e registro de movimentações
+│   │   ├── movimentacoes.html
+│   │   ├── nova_movimentacao.html
+│   │   └── movimentacao_rapida.html
+│   ├── relatorios/        # Relatórios
+│   │   └── relatorios.html
 │   ├── caixas/            # CRUD de caixas
 │   │   ├── caixas.html
 │   │   ├── nova_caixa.html
@@ -115,13 +151,20 @@ conveniencia/
 │   │   └── editar_pedido.html
 │   ├── vendas/            # Lista de vendas
 │   │   └── vendas.html
-│   ├── 404.html           # Página de erro 404
-│   └── 500.html           # Página de erro 500
+│   ├── fornecedores/      # CRUD de fornecedores
+│   │   ├── fornecedores.html
+│   │   ├── novo_fornecedor.html
+│   │   └── editar_fornecedor.html
+│   ├── errors/            # Páginas de erro
+│   │   ├── 404.html
+│   │   └── 500.html
 ├── static/                # Arquivos estáticos
 │   ├── css/
 │   │   └── style.css      # Estilos responsivos
-│   └── js/
-│       └── main.js        # JavaScript
+│   ├── js/
+│   │   ├── main.js        # JavaScript e menus
+│   │   └── quagga.min.js  # Leitura de código de barras
+│   └── img/               # Imagens
 └── estoque.db             # Banco de dados (criado automaticamente)
 ```
 
@@ -157,6 +200,16 @@ O projeto usa **SQLite** com as seguintes tabelas:
 - motivo
 - observacoes
 - criado_em
+
+### 4. **funcionarios** (Novo)
+- id (PK)
+- nome
+- email (único)
+- senha_hash (bcrypt)
+- role (admin/gerente/caixa/operador)
+- ativo
+- criado_em
+- atualizado_em
 
 ## 🎨 Design Responsivo
 
@@ -201,10 +254,14 @@ O sistema é totalmente responsivo com breakpoints para:
 
 ## 🔒 Segurança
 
-- As senhas não são implementadas na versão inicial
-- Para produção, adicione autenticação e validação de segurança
-- Use variáveis de ambiente para dados sensíveis
-- Configure SECRET_KEY em produção
+- ✅ **Autenticação**: Sistema de login com email e senha (bcrypt hashing)
+- ✅ **Controle de Acesso**: Role-based access control (RBAC) com 4 níveis
+- ✅ **Proteção de Rotas**: Todas as rotas protegidas com @login_required
+- ✅ **Sessão Segura**: Cookies de sessão com SameSite=Lax
+- ✅ **Senhas Criptografadas**: Uso de werkzeug.security para hash bcrypt
+- ⚠️ **Produção**: Configure SECRET_KEY com um valor aleatório forte em produção
+- ⚠️ **HTTPS**: Use HTTPS em produção
+- ⚠️ **Variáveis de Ambiente**: Nunca commite credenciais no repositório
 
 ## 🚦 Fazendo Builds e Deploy
 
