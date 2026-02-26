@@ -7,10 +7,6 @@ Allow: /api/
 Disallow: /admin/
 Disallow: /private/
 
-# APIs públicas
-Allow: /api/estoque
-Allow: /api/produtos
-Allow: /api/categorias
 
 # Sitemaps
 Sitemap: https://systemlr.com/sitemap.xml

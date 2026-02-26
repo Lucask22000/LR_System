@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Vendas - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Vendas</h1>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Total</th>
+                <th>Caixa</th>
+                <th>Mesa</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venda in vendas %}
+            <tr>
+                <td>{{ venda.id }}</td>
+                <td>R$ {{ '%.2f'|format(venda.total) }}</td>
+                <td>{{ venda.caixa.nome if venda.caixa else '' }}</td>
+                <td>{{ venda.mesa.numero if venda.mesa else '' }}</td>
+                <td>{{ venda.fechado_em.strftime('%d/%m/%Y %H:%M') if venda.fechado_em }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhuma venda realizada</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

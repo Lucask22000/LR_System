@@ -14,6 +14,7 @@ Um sistema web completo de gerenciamento de estoque para conveniências, desenvo
 - 📱 **Responsivo** - Interface adaptável para mobile e desktop
 - 🔔 **Alertas** - Notificações de produtos em falta
 - 💰 **Análise Financeira** - Cálculo de lucro e margem de lucro
+- 💳 **Sistema de Vendas** - pedidos, mesas e caixas diretamente pela interface web
 
 ## 🛠️ Requisitos
 
@@ -48,6 +49,19 @@ pip install -r requirements.txt
 
 ## 🚀 Como Usar
 
+### 📁 Auto‑commit (opcional)
+Se desejar que todas as alterações sejam registradas automaticamente no Git, há um pequeno script
+`autocommit.ps1` na raiz. Abra o PowerShell na pasta do projeto e execute:
+
+```powershell
+.\.\autocommit.ps1
+```
+
+O script observa o diretório e faz `git add -A && git commit` com uma mensagem de timestamp cada
+vez que um arquivo é modificado/criado/excluído. Pressione Enter para parar o watcher.
+
+
+
 ### 1. Executar a aplicação
 
 ```bash
@@ -65,6 +79,8 @@ python app.py
 - Comece criando categorias de produtos
 - Cadastre seus produtos
 - Registre movimentações de estoque
+- Configure caixas e mesas para iniciar vendas
+- Abra pedidos e acompanhe vendas
 - Acompanhe relatórios e alertas
 
 ## 📁 Estrutura do Projeto
@@ -85,6 +101,20 @@ conveniencia/
 │   ├── categorias.html    # Gerenciamento de categorias
 │   ├── movimentacoes.html # Histórico de movimentações
 │   ├── relatorios.html    # Relatórios
+│   ├── caixas/            # CRUD de caixas
+│   │   ├── caixas.html
+│   │   ├── nova_caixa.html
+│   │   └── editar_caixa.html
+│   ├── mesas/             # CRUD de mesas
+│   │   ├── mesas.html
+│   │   ├── nova_mesa.html
+│   │   └── editar_mesa.html
+│   ├── pedidos/           # Pedidos (comandas)
+│   │   ├── pedidos.html
+│   │   ├── novo_pedido.html
+│   │   └── editar_pedido.html
+│   ├── vendas/            # Lista de vendas
+│   │   └── vendas.html
 │   ├── 404.html           # Página de erro 404
 │   └── 500.html           # Página de erro 500
 ├── static/                # Arquivos estáticos

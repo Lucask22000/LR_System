@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Pedidos - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Pedidos</h1>
+    <a href="{{ url_for('novo_pedido') }}" class="btn btn-primary">➕ Novo Pedido</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Mesa</th>
+                <th>Caixa</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td>{{ pedido.id }}</td>
+                <td>{{ pedido.mesa.numero if pedido.mesa else '' }}</td>
+                <td>{{ pedido.caixa.nome if pedido.caixa else '' }}</td>
+                <td>R$ {{ '%.2f'|format(pedido.total) }}</td>
+                <td>{{ pedido.status }}</td>
+                <td class="actions-cell">
+                    <a href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}" class="btn-small btn-warning">✏️</a>
+                    <form method="POST" action="{{ url_for('deletar_pedido', pedido_id=pedido.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-small btn-danger" onclick="return confirmarDelecao('Excluir pedido?')">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum pedido cadastrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

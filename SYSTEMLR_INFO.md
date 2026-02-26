@@ -35,7 +35,8 @@ Seu sistema foi completamente renomeado e rebrandizado como **SystemLR** com dom
 
 #### **Backend Atualizado**
 - ✅ Variáveis de sistema adicionadas (APP_NAME, APP_VERSION, APP_DOMAIN)
-- ✅ Nova API: `/api/sistema/info` - retorna metadados do SystemLR
+- ✅ Removidas APIs REST em favor de interface web completa
+- ✅ Novas rotas e templates para caixas, mesas, pedidos e vendas
 - ✅ Atualizado: app.py, models.py, config.py
 
 #### **Documentação Criada**
@@ -58,49 +59,18 @@ Seu sistema foi completamente renomeado e rebrandizado como **SystemLR** com dom
 - https://systemlr.com
 - https://www.systemlr.com
 
-### 📊 API do Sistema
+### � Sistema de Vendas
 
-Obter informações do SystemLR:
-```bash
-GET /api/sistema/info
-```
+O aplicativo agora possui uma interface completa para vendas e comandas:
+- Cadastre **caixas** e **mesas**
+- Abra e edite **pedidos** com itens e observações
+- Consulte **vendas** fechadas com total e origem
 
-Resposta:
-```json
-{
-  "nome": "SystemLR",
-  "versao": "1.0.0",
-  "dominio": "systemlr.com",
-  "desenvolvido_por": "SystemLR",
-  "ano": 2026,
-  "banco_de_dados": "SQLite",
-  "framework": "Flask"
-}
-```
+Essa funcionalidade substitui as antigas APIs de negócios; tudo é feito
+pelas páginas web acima.
 
-### 💼 APIs de Operações Comerciais
 
-Além da informação geral, o sistema possui endpoints para gerenciar vendas, caixas, mesas e pedidos. Consulte `/api-documentation` para uma lista completa;
-alguns exemplos:
 
-```bash
-# listar caixas
-GET /api/caixas
-
-# criar mesa
-POST /api/mesas  --json '{"numero":"A1","capacidade":4}'
-
-# abrir pedido
-POST /api/pedidos  --json '{"mesa_id":1,"caixa_id":1,"itens":[{"produto_id":5,"quantidade":2}]}'
-
-# fechar pedido
-PUT /api/pedidos/3  --json '{"status":"fechado"}'
-
-# consultar vendas (pedidos fechados)
-GET /api/vendas
-```
-
-Note que o fechamento de um pedido reduz automaticamente o estoque e gera movimentações do tipo `saida`.
 
 ### 🎯 Navegação Atualizada
 

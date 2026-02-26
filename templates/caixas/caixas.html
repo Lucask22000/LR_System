@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Caixas - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Caixas</h1>
+    <a href="{{ url_for('nova_caixa') }}" class="btn btn-primary">➕ Novo Caixa</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Saldo Inicial</th>
+                <th>Saldo Atual</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for caixa in caixas %}
+            <tr>
+                <td>{{ caixa.nome }}</td>
+                <td>R$ {{ '%.2f'|format(caixa.saldo_inicial) }}</td>
+                <td>R$ {{ '%.2f'|format(caixa.saldo_atual) }}</td>
+                <td>
+                    {% if caixa.aberto %}
+                        <span class="badge badge-success">Aberto</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Fechado</span>
+                    {% endif %}
+                </td>
+                <td class="actions-cell">
+                    <a href="{{ url_for('editar_caixa', caixa_id=caixa.id) }}" class="btn-small btn-warning">✏️</a>
+                    <form method="POST" action="{{ url_for('deletar_caixa', caixa_id=caixa.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-small btn-danger" onclick="return confirmarDelecao('Tem certeza que deseja excluir este caixa?')">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhum caixa encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

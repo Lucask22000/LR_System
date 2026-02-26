@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Mesas - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Mesas</h1>
+    <a href="{{ url_for('nova_mesa') }}" class="btn btn-primary">➕ Nova Mesa</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Capacidade</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mesa in mesas %}
+            <tr>
+                <td>{{ mesa.numero }}</td>
+                <td>{{ mesa.capacidade }}</td>
+                <td>{{ mesa.status }}</td>
+                <td class="actions-cell">
+                    <a href="{{ url_for('editar_mesa', mesa_id=mesa.id) }}" class="btn-small btn-warning">✏️</a>
+                    <form method="POST" action="{{ url_for('deletar_mesa', mesa_id=mesa.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-small btn-danger" onclick="return confirmarDelecao('Excluir mesa?')">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">Nenhuma mesa encontrada</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

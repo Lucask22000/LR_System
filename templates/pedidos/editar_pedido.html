@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Pedido - SystemLR{% endblock %}
+
+{% block extra_js %}
+<script>
+let itemCount = {{ pedido.itens|length }};
+function adicionarItem() {
+    const container = document.getElementById('itensContainer');
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+        <select name="produto_${itemCount}" required class="form-control">
+            <option value="">Selecione um produto</option>
+            {% for p in produtos %}
+            <option value="{{ p.id }}">{{ p.nome }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="quantidade_${itemCount}" value="1" min="1" required class="form-control" style="width:80px; margin-left:8px;">
+        <button type="button" class="btn btn-secondary" onclick="this.parentElement.remove();">✖</button>
+    `;
+    container.appendChild(row);
+    itemCount++;
+    document.getElementById('item_count').value = itemCount;
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<h1>Editar Pedido #{{ pedido.id }}</h1>
+<form method="POST" id="formPedidoEdit" onsubmit="return validarFormulario('formPedidoEdit')">
+    <div class="form-group">
+        <label for="mesa_id">Mesa (opcional)</label>
+        <select name="mesa_id" id="mesa_id" class="form-control">
+            <option value="">Nenhuma</option>
+            {% for m in mesas %}
+            <option value="{{ m.id }}" {% if pedido.mesa_id==m.id %}selected{% endif %}>{{ m.numero }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="caixa_id">Caixa</label>
+        <select name="caixa_id" id="caixa_id" class="form-control" required>
+            <option value="">Selecione</option>
+            {% for c in caixas %}
+            <option value="{{ c.id }}" {% if pedido.caixa_id==c.id %}selected{% endif %}>{{ c.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="status">Status</label>
+        <select name="status" id="status" class="form-control" required>
+            <option value="aberto" {% if pedido.status=='aberto' %}selected{% endif %}>Aberto</option>
+            <option value="fechado" {% if pedido.status=='fechado' %}selected{% endif %}>Fechado</option>
+            <option value="cancelado" {% if pedido.status=='cancelado' %}selected{% endif %}>Cancelado</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="observacoes">Observações</label>
+        <textarea name="observacoes" id="observacoes" class="form-control">{{ pedido.observacoes }}</textarea>
+    </div>
+    <h3>Itens</h3>
+    <div id="itensContainer">
+        {% for item in pedido.itens %}
+        <div class="item-row">
+            <select name="produto_{{ loop.index0 }}" required class="form-control">
+                <option value="">Selecione um produto</option>
+                {% for p in produtos %}
+                <option value="{{ p.id }}" {% if p.id==item.produto_id %}selected{% endif %}>{{ p.nome }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="quantidade_{{ loop.index0 }}" value="{{ item.quantidade }}" min="1" required class="form-control" style="width:80px; margin-left:8px;">
+            <button type="button" class="btn btn-secondary" onclick="this.parentElement.remove();">✖</button>
+        </div>
+        {% endfor %}
+    </div>
+    <input type="hidden" name="item_count" id="item_count" value="{{ pedido.itens|length }}">
+    <button type="button" class="btn btn-secondary" onclick="adicionarItem()">➕ Adicionar Item</button>
+    <br><br>
+    <button type="submit" class="btn btn-primary">Salvar Pedido</button>
+    <a href="{{ url_for('listar_pedidos') }}" class="btn btn-secondary">✕ Cancelar</a>
+</form>
+{% endblock %}

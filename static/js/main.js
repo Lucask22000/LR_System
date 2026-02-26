@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.getElementById('menuToggle');
     const navbarMenu = document.getElementById('navbarMenu');
+    const dropdownToggles = document.querySelectorAll('.nav-dropdown-toggle');
 
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
@@ -16,6 +17,18 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const parentDropdown = this.closest('.nav-dropdown');
+            document.querySelectorAll('.nav-dropdown.open').forEach(drop => {
+                if (drop !== parentDropdown) {
+                    drop.classList.remove('open');
+                }
+            });
+            parentDropdown.classList.toggle('open');
+        });
+    });
 
     // Fechar alertas ao clicar em X
     const closeButtons = document.querySelectorAll('.close-alert');
@@ -79,28 +92,4 @@ function confirmarDelecao(mensagem = 'Tem certeza que deseja deletar este item?'
 }
 
 // Buscar dados da API
-async function buscarDados(endpoint) {
-    try {
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-            throw new Error(`Erro HTTP! Status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-        return null;
-    }
-}
 
-// Atualizar resumo do estoque em tempo real
-function atualizarResumoEstoque() {
-    buscarDados('/api/estoque/resumo').then(dados => {
-        if (dados) {
-            // Atualizar elementos visuais com os dados
-            console.log('Resumo do estoque:', dados);
-        }
-    });
-}
-
-// Chamar função de atualização periodicamente (a cada 30 segundos)
-setInterval(atualizarResumoEstoque, 30000);

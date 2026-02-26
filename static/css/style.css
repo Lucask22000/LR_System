@@ -1,5 +1,5 @@
-/* ========================================
-   VARIÁVEIS E ESTILOS GLOBAIS
+﻿/* ========================================
+   VARIÃVEIS E ESTILOS GLOBAIS
    ======================================== */
 
 :root {
@@ -78,26 +78,79 @@ body {
     padding: 0 20px;
 }
 
-.navbar-brand h1 {
+
+.brand-link {
     color: white;
-    font-size: 1.5em;
-    margin: 15px 0;
+    text-decoration: none;
+}
+
+.brand-link:hover {
+    text-decoration: underline;
 }
 
 .navbar-menu {
     display: flex;
+    align-items: center;
     gap: 0;
 }
 
-.nav-section-title {
+.item-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    padding: 15px;
+    font-size: 0.95em;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nav-dropdown-toggle:hover {
+    background-color: var(--primary-dark);
+}
+
+.nav-submenu {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    min-width: 230px;
+    background-color: var(--primary-dark);
+    box-shadow: var(--shadow);
+    z-index: 200;
+}
+
+.nav-dropdown:hover .nav-submenu,
+.nav-dropdown.open .nav-submenu {
+    display: block;
+}
+
+.nav-sublink {
     display: block;
     width: 100%;
-    padding: 0.5rem 1rem;
+    padding: 10px 12px;
+}
+
+.nav-submenu-empty {
+    display: block;
+    padding: 10px 12px;
     color: #fff;
-    font-weight: bold;
-    font-size: 0.9rem;
-    opacity: 0.7;
-    margin-top: 0.5rem;
+    opacity: 0.85;
+    font-size: 0.9em;
 }
 
 @media (max-width: 767px) {
@@ -105,8 +158,26 @@ body {
         flex-direction: column;
         align-items: flex-start;
     }
-    .nav-section-title {
-        padding-left: 1.5rem;
+
+    .nav-dropdown {
+        width: 100%;
+    }
+
+    .nav-dropdown-toggle {
+        width: 100%;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .nav-submenu {
+        position: static;
+        width: 100%;
+        background-color: rgba(0,0,0,0.1);
+        box-shadow: none;
+    }
+
+    .nav-sublink {
+        padding-left: 30px;
     }
 }
 
@@ -141,7 +212,7 @@ body {
 }
 
 /* ========================================
-   HEADERS E TÍTULOS
+   HEADERS E TÃTULOS
    ======================================== */
 
 .page-header {
@@ -207,7 +278,7 @@ body {
     margin: 0;
 }
 
-/* Variações de cor */
+/* VariaÃ§Ãµes de cor */
 .card-primary .card-icon { color: var(--primary); }
 .card-success .card-icon { color: var(--success); }
 .card-danger .card-icon { color: var(--danger); }
@@ -312,7 +383,7 @@ body {
 }
 
 /* ========================================
-   FORMULÁRIOS
+   FORMULÃRIOS
    ======================================== */
 
 .form-container {
@@ -484,7 +555,7 @@ body {
 }
 
 /* ========================================
-   SEÇÕES
+   SEÃ‡Ã•ES
    ======================================== */
 
 .section {
@@ -778,10 +849,6 @@ body {
 @media (max-width: 480px) {
     .main-content {
         padding: 10px;
-    }
-
-    .navbar-brand h1 {
-        font-size: 1.2em;
     }
 
     .page-header h1 {

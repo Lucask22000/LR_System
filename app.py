@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+﻿from flask import Flask, render_template, request, redirect, url_for, flash
 from config import config
 from models import db, Categoria, Produto, Movimentacao, Caixa, Mesa, Pedido, ItemPedido
 from datetime import datetime, timedelta
@@ -20,11 +20,6 @@ TIPOS_MOVIMENTACAO_VALIDOS = {Movimentacao.TIPO_ENTRADA, Movimentacao.TIPO_SAIDA
 # Criar tabelas
 with app.app_context():
     db.create_all()
-
-
-def obter_categorias_menu():
-    """Retorna categorias ordenadas para menu global."""
-    return Categoria.query.order_by(Categoria.nome.asc()).all()
 
 
 def aplicar_movimentacao_estoque(produto, tipo, quantidade):
@@ -52,6 +47,12 @@ def aplicar_movimentacao_estoque(produto, tipo, quantidade):
 
 @app.route('/')
 def index():
+    """Página inicial"""
+    return redirect(url_for('boas_vindas'))
+
+
+@app.route('/dashboard')
+def dashboard():
     """Dashboard principal"""
     total_produtos = Produto.query.count()
     produtos_em_falta = Produto.query.filter(
@@ -67,13 +68,25 @@ def index():
         Movimentacao.criado_em.desc()
     ).limit(10).all()
     
-    return render_template('index.html',
+    return render_template('dashboard/index.html',
         total_produtos=total_produtos,
         produtos_em_falta=produtos_em_falta,
         valor_total_estoque=f'{valor_total_estoque:.2f}',
         movimentacoes_recentes=movimentacoes_recentes
     )
 
+
+@app.route('/boas-vindas')
+def boas_vindas():
+    """Tela de boas-vindas e informações gerais"""
+    return render_template(
+        'sistema/boas_vindas.html',
+        app_name=APP_NAME,
+        app_version=APP_VERSION,
+        app_domain=APP_DOMAIN,
+        total_produtos=Produto.query.count(),
+        total_categorias=Categoria.query.count()
+    )
 # ============ ROTAS - PRODUTOS ============
 
 @app.route('/produtos')
@@ -98,7 +111,7 @@ def listar_produtos():
     produtos = query.all()
     categorias = Categoria.query.all()
     
-    return render_template('produtos.html',
+    return render_template('produtos/produtos.html',
         produtos=produtos,
         categorias=categorias,
         categoria_selecionada=categoria_id,
@@ -138,7 +151,7 @@ def novo_produto():
             flash(f'Erro ao criar produto: {str(e)}', 'error')
     
     categorias = Categoria.query.all()
-    return render_template('novo_produto.html', categorias=categorias)
+    return render_template('produtos/novo_produto.html', categorias=categorias)
 
 @app.route('/produtos/<int:produto_id>/editar', methods=['GET', 'POST'])
 def editar_produto(produto_id):
@@ -162,7 +175,7 @@ def editar_produto(produto_id):
             flash(f'Erro ao atualizar produto: {str(e)}', 'error')
     
     categorias = Categoria.query.all()
-    return render_template('editar_produto.html', produto=produto, categorias=categorias)
+    return render_template('produtos/editar_produto.html', produto=produto, categorias=categorias)
 
 @app.route('/produtos/<int:produto_id>')
 def visualizar_produto(produto_id):
@@ -172,7 +185,7 @@ def visualizar_produto(produto_id):
         Movimentacao.criado_em.desc()
     ).all()
     
-    return render_template('visualizar_produto.html',
+    return render_template('produtos/visualizar_produto.html',
         produto=produto,
         movimentacoes=movimentacoes
     )
@@ -198,7 +211,7 @@ def deletar_produto(produto_id):
 def listar_categorias():
     """Lista todas as categorias"""
     categorias = Categoria.query.all()
-    return render_template('categorias.html', categorias=categorias)
+    return render_template('categorias/categorias.html', categorias=categorias)
 
 @app.route('/categorias/nova', methods=['GET', 'POST'])
 def nova_categoria():
@@ -217,7 +230,7 @@ def nova_categoria():
             db.session.rollback()
             flash(f'Erro ao criar categoria: {str(e)}', 'error')
     
-    return render_template('nova_categoria.html')
+    return render_template('categorias/nova_categoria.html')
 
 @app.route('/categorias/<int:categoria_id>/editar', methods=['GET', 'POST'])
 def editar_categoria(categoria_id):
@@ -235,7 +248,7 @@ def editar_categoria(categoria_id):
             db.session.rollback()
             flash(f'Erro ao atualizar categoria: {str(e)}', 'error')
     
-    return render_template('editar_categoria.html', categoria=categoria)
+    return render_template('categorias/editar_categoria.html', categoria=categoria)
 
 @app.route('/categorias/<int:categoria_id>/deletar', methods=['POST'])
 def deletar_categoria(categoria_id):
@@ -252,16 +265,9 @@ def deletar_categoria(categoria_id):
     
     return redirect(url_for('listar_categorias'))
 
-# ============ ROTAS - SCANNER DE CÃ“DIGO DE BARRAS ============
-
-@app.route('/scanner')
-def scanner():
-    """PÃ¡gina do scanner de cÃ³digo de barras"""
-    return render_template('scanner.html')
-
 @app.route('/movimentacoes/rapido/<int:produto_id>', methods=['GET', 'POST'])
 def movimentacao_rapida(produto_id):
-    """Movimentação rápida via scanner"""
+    """Movimentação rápida por produto"""
     produto = Produto.query.get_or_404(produto_id)
     
     if request.method == 'POST':
@@ -287,12 +293,12 @@ def movimentacao_rapida(produto_id):
             db.session.commit()
             
             flash('Movimentação registrada com sucesso!', 'success')
-            return redirect(url_for('scanner'))
+            return redirect(url_for('listar_movimentacoes'))
         except Exception as e:
             db.session.rollback()
             flash(f'Erro ao registrar movimentação: {str(e)}', 'error')
     
-    return render_template('movimentacao_rapida.html', produto=produto)
+    return render_template('movimentacoes/movimentacao_rapida.html', produto=produto)
 
 # ============ ROTAS - MOVIMENTAÃ‡Ã•ES (ESTOQUE) ============
 
@@ -313,7 +319,7 @@ def listar_movimentacoes():
     movimentacoes = query.order_by(Movimentacao.criado_em.desc()).all()
     produtos = Produto.query.all()
     
-    return render_template('movimentacoes.html',
+    return render_template('movimentacoes/movimentacoes.html',
         movimentacoes=movimentacoes,
         produtos=produtos,
         produto_selecionado=produto_id,
@@ -322,36 +328,24 @@ def listar_movimentacoes():
 
 @app.route('/movimentacoes/nova', methods=['GET', 'POST'])
 def nova_movimentacao():
-    """Registrar nova movimentaÃ§Ã£o"""
+    """Registrar nova movimentação"""
     if request.method == 'POST':
         try:
             produto_id = int(request.form.get('produto_id'))
             tipo = request.form.get('tipo')
             quantidade = int(request.form.get('quantidade'))
             
-            if tipo not in ['entrada', 'saida']:
-                flash('Tipo de movimentaÃ§Ã£o invÃ¡lido', 'error')
-                return redirect(url_for('nova_movimentacao'))
-            
-            if quantidade <= 0:
-                flash('Quantidade deve ser maior que 0', 'error')
-                return redirect(url_for('nova_movimentacao'))
-            
             produto = Produto.query.get(produto_id)
             if not produto:
-                flash('Produto nÃ£o encontrado', 'error')
+                flash('Produto não encontrado', 'error')
+                return redirect(url_for('nova_movimentacao'))
+
+            erro = aplicar_movimentacao_estoque(produto, tipo, quantidade)
+            if erro:
+                flash(erro, 'error')
                 return redirect(url_for('nova_movimentacao'))
             
-            # Atualizar estoque
-            if tipo == 'entrada':
-                produto.quantidade_estoque += quantidade
-            else:  # saida
-                if produto.quantidade_estoque < quantidade:
-                    flash('Quantidade em estoque insuficiente', 'error')
-                    return redirect(url_for('nova_movimentacao'))
-                produto.quantidade_estoque -= quantidade
-            
-            # Registrar movimentaÃ§Ã£o
+            # Registrar movimentação
             movimentacao = Movimentacao(
                 produto_id=produto_id,
                 tipo=tipo,
@@ -363,14 +357,14 @@ def nova_movimentacao():
             db.session.add(movimentacao)
             db.session.commit()
             
-            flash('MovimentaÃ§Ã£o registrada com sucesso!', 'success')
+            flash('Movimentação registrada com sucesso!', 'success')
             return redirect(url_for('listar_movimentacoes'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Erro ao registrar movimentaÃ§Ã£o: {str(e)}', 'error')
+            flash(f'Erro ao registrar movimentação: {str(e)}', 'error')
     
     produtos = Produto.query.filter_by(ativo=True).all()
-    return render_template('nova_movimentacao.html', produtos=produtos)
+    return render_template('movimentacoes/nova_movimentacao.html', produtos=produtos)
 
 # ============ ROTAS - RELATÃ“RIOS ============
 
@@ -404,7 +398,7 @@ def relatorios():
         Movimentacao.criado_em >= data_limite
     ).count()
     
-    return render_template('relatorios.html',
+    return render_template('relatorios/relatorios.html',
         total_produtos=total_produtos,
         produtos_ativos=produtos_ativos,
         produtos_inativos=produtos_inativos,
@@ -414,297 +408,219 @@ def relatorios():
         movimentacoes_mes=movimentacoes_mes
     )
 
-# ============ API - ENDPOINTS PARA JAVASCRIPT ============
 
-@app.route('/api-documentation')
-def api_documentation():
-    """PÃ¡gina simples descrevendo as APIs disponÃ­veis"""
-    endpoints = [
-        {'path': '/api/produtos/json', 'methods': ['GET'], 'description': 'Lista produtos'},
-        {'path': '/api/caixas', 'methods': ['GET','POST'], 'description': 'Cadastra/lista caixas'},
-        {'path': '/api/caixas/<id>', 'methods': ['GET','PUT','DELETE'], 'description': 'OperaÃ§Ãµes com caixa especÃ­fica'},
-        {'path': '/api/mesas', 'methods': ['GET','POST'], 'description': 'Cadastra/lista mesas'},
-        {'path': '/api/mesas/<id>', 'methods': ['GET','PUT','DELETE'], 'description': 'OperaÃ§Ãµes com mesa'},
-        {'path': '/api/pedidos', 'methods': ['GET','POST'], 'description': 'Cadastra/lista pedidos'},
-        {'path': '/api/pedidos/<id>', 'methods': ['GET','PUT','DELETE'], 'description': 'OperaÃ§Ãµes com pedido'},
-        {'path': '/api/vendas', 'methods': ['GET'], 'description': 'Lista vendas (pedidos fechados)'},
-        {'path': '/api/sistema-info', 'methods': ['GET'], 'description': 'InformaÃ§Ãµes do sistema'}
-    ]
-    return render_template('api_documentation.html', endpoints=endpoints)
+# ============ ROTAS - CAIXAS ============
 
+@app.route('/caixas')
+def listar_caixas():
+    caixas = Caixa.query.all()
+    return render_template('caixas/caixas.html', caixas=caixas)
 
-@app.route('/api/produtos/json')
-def api_produtos():
-    """API para obter produtos em JSON"""
-    produtos = Produto.query.all()
-    return jsonify([{
-        'id': p.id,
-        'codigo': p.codigo,
-        'nome': p.nome,
-        'categoria': p.categoria.nome,
-        'preco_venda': p.preco_venda,
-        'quantidade': p.quantidade_estoque,
-        'em_falta': p.em_falta
-    } for p in produtos])
+@app.route('/caixas/nova', methods=['GET', 'POST'])
+def nova_caixa():
+    if request.method == 'POST':
+        try:
+            nome = request.form.get('nome')
+            saldo = float(request.form.get('saldo_inicial') or 0)
+            caixa = Caixa(nome=nome, saldo_inicial=saldo, saldo_atual=saldo)
+            db.session.add(caixa)
+            db.session.commit()
+            flash(f'Caixa "{caixa.nome}" criado com sucesso!', 'success')
+            return redirect(url_for('listar_caixas'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao criar caixa: {str(e)}', 'error')
+    return render_template('caixas/nova_caixa.html')
 
-
-# ======== NOVAS APIs DE VENDAS / CAIXA / MESAS / PEDIDOS ========
-
-@app.route('/api/caixas', methods=['GET', 'POST'])
-def api_caixas():
-    if request.method == 'GET':
-        caixas = Caixa.query.all()
-        return jsonify([{
-            'id': c.id,
-            'nome': c.nome,
-            'saldo_inicial': c.saldo_inicial,
-            'saldo_atual': c.saldo_atual,
-            'aberto': c.aberto
-        } for c in caixas])
-
-    data = request.get_json() or {}
-    Caixa_obj = Caixa(
-        nome=data.get('nome'),
-        saldo_inicial=data.get('saldo_inicial', 0),
-        saldo_atual=data.get('saldo_inicial', 0),
-        aberto=bool(data.get('aberto', True))
-    )
-    db.session.add(Caixa_obj)
-    db.session.commit()
-    return jsonify({'id': Caixa_obj.id}), 201
-
-@app.route('/api/caixas/<int:caixa_id>', methods=['GET', 'PUT', 'DELETE'])
-def api_caixa(caixa_id):
+@app.route('/caixas/<int:caixa_id>/editar', methods=['GET', 'POST'])
+def editar_caixa(caixa_id):
     caixa = Caixa.query.get_or_404(caixa_id)
-    if request.method == 'GET':
-        return jsonify({
-            'id': caixa.id,
-            'nome': caixa.nome,
-            'saldo_inicial': caixa.saldo_inicial,
-            'saldo_atual': caixa.saldo_atual,
-            'aberto': caixa.aberto
-        })
-    if request.method == 'PUT':
-        data = request.get_json() or {}
-        caixa.nome = data.get('nome', caixa.nome)
-        caixa.saldo_atual = data.get('saldo_atual', caixa.saldo_atual)
-        caixa.aberto = data.get('aberto', caixa.aberto)
-        if not caixa.aberto:
-            caixa.fechado_em = datetime.utcnow()
-        db.session.commit()
-        return jsonify({'status': 'ok'})
-    if request.method == 'DELETE':
+    if request.method == 'POST':
+        try:
+            caixa.nome = request.form.get('nome', caixa.nome)
+            caixa.saldo_atual = float(request.form.get('saldo_atual', caixa.saldo_atual))
+            aberto = request.form.get('aberto')
+            caixa.aberto = bool(aberto == 'on')
+            if not caixa.aberto and not caixa.fechado_em:
+                caixa.fechado_em = datetime.utcnow()
+            db.session.commit()
+            flash(f'Caixa "{caixa.nome}" atualizado com sucesso!', 'success')
+            return redirect(url_for('listar_caixas'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao atualizar caixa: {str(e)}', 'error')
+    return render_template('caixas/editar_caixa.html', caixa=caixa)
+
+@app.route('/caixas/<int:caixa_id>/deletar', methods=['POST'])
+def deletar_caixa(caixa_id):
+    caixa = Caixa.query.get_or_404(caixa_id)
+    try:
         db.session.delete(caixa)
         db.session.commit()
-        return ('', 204)
+        flash(f'Caixa "{caixa.nome}" deletado.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao deletar caixa: {str(e)}', 'error')
+    return redirect(url_for('listar_caixas'))
 
-@app.route('/api/mesas', methods=['GET', 'POST'])
-def api_mesas():
-    if request.method == 'GET':
-        mesas = Mesa.query.all()
-        return jsonify([{
-            'id': m.id,
-            'numero': m.numero,
-            'capacidade': m.capacidade,
-            'status': m.status
-        } for m in mesas])
-    data = request.get_json() or {}
-    mesa = Mesa(
-        numero=data.get('numero'),
-        capacidade=data.get('capacidade', 4),
-        status=data.get('status', 'livre')
-    )
-    db.session.add(mesa)
-    db.session.commit()
-    return jsonify({'id': mesa.id}), 201
+# ============ ROTAS - MESAS ============
 
-@app.route('/api/mesas/<int:mesa_id>', methods=['GET', 'PUT', 'DELETE'])
-def api_mesa(mesa_id):
+@app.route('/mesas')
+def listar_mesas():
+    mesas = Mesa.query.all()
+    return render_template('mesas/mesas.html', mesas=mesas)
+
+@app.route('/mesas/nova', methods=['GET', 'POST'])
+def nova_mesa():
+    if request.method == 'POST':
+        try:
+            numero = request.form.get('numero')
+            capacidade = int(request.form.get('capacidade') or 1)
+            mesa = Mesa(numero=numero, capacidade=capacidade, status='livre')
+            db.session.add(mesa)
+            db.session.commit()
+            flash(f'Mesa "{mesa.numero}" criada com sucesso!', 'success')
+            return redirect(url_for('listar_mesas'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao criar mesa: {str(e)}', 'error')
+    return render_template('mesas/nova_mesa.html')
+
+@app.route('/mesas/<int:mesa_id>/editar', methods=['GET', 'POST'])
+def editar_mesa(mesa_id):
     mesa = Mesa.query.get_or_404(mesa_id)
-    if request.method == 'GET':
-        return jsonify({
-            'id': mesa.id,
-            'numero': mesa.numero,
-            'capacidade': mesa.capacidade,
-            'status': mesa.status
-        })
-    if request.method == 'PUT':
-        data = request.get_json() or {}
-        mesa.numero = data.get('numero', mesa.numero)
-        mesa.capacidade = data.get('capacidade', mesa.capacidade)
-        mesa.status = data.get('status', mesa.status)
-        db.session.commit()
-        return jsonify({'status': 'ok'})
-    if request.method == 'DELETE':
+    if request.method == 'POST':
+        try:
+            mesa.numero = request.form.get('numero', mesa.numero)
+            mesa.capacidade = int(request.form.get('capacidade', mesa.capacidade))
+            mesa.status = request.form.get('status', mesa.status)
+            db.session.commit()
+            flash(f'Mesa "{mesa.numero}" atualizada!', 'success')
+            return redirect(url_for('listar_mesas'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao atualizar mesa: {str(e)}', 'error')
+    return render_template('mesas/editar_mesa.html', mesa=mesa)
+
+@app.route('/mesas/<int:mesa_id>/deletar', methods=['POST'])
+def deletar_mesa(mesa_id):
+    mesa = Mesa.query.get_or_404(mesa_id)
+    try:
         db.session.delete(mesa)
         db.session.commit()
-        return ('', 204)
+        flash(f'Mesa "{mesa.numero}" deletada.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao deletar mesa: {str(e)}', 'error')
+    return redirect(url_for('listar_mesas'))
 
-@app.route('/api/pedidos', methods=['GET', 'POST'])
-def api_pedidos():
-    if request.method == 'GET':
-        pedidos = Pedido.query.all()
-        return jsonify([{
-            'id': p.id,
-            'mesa_id': p.mesa_id,
-            'caixa_id': p.caixa_id,
-            'total': p.total,
-            'status': p.status
-        } for p in pedidos])
-    data = request.get_json() or {}
-    pedido = Pedido(
-        mesa_id=data.get('mesa_id'),
-        caixa_id=data.get('caixa_id'),
-        status=data.get('status', 'aberto'),
-        observacoes=data.get('observacoes')
-    )
-    db.session.add(pedido)
-    db.session.commit()
-    # adicionar itens se existir lista
-    for item in data.get('itens', []):
-        prod = Produto.query.get(item['produto_id'])
-        if not prod: continue
-        ip = ItemPedido(
-            pedido_id=pedido.id,
-            produto_id=prod.id,
-            quantidade=item.get('quantidade',1),
-            preco_unitario=item.get('preco_unitario', prod.preco_venda)
-        )
-        db.session.add(ip)
-    pedido.calcular_total()
-    db.session.commit()
-    return jsonify({'id': pedido.id}), 201
+# ============ ROTAS - PEDIDOS ============
 
-@app.route('/api/pedidos/<int:pedido_id>', methods=['GET', 'PUT', 'DELETE'])
-def api_pedido(pedido_id):
-    pedido = Pedido.query.get_or_404(pedido_id)
-    if request.method == 'GET':
-        return jsonify({
-            'id': pedido.id,
-            'mesa_id': pedido.mesa_id,
-            'caixa_id': pedido.caixa_id,
-            'total': pedido.total,
-            'status': pedido.status,
-            'itens': [{
-                'produto_id': i.produto_id,
-                'quantidade': i.quantidade,
-                'preco_unitario': i.preco_unitario
-            } for i in pedido.itens]
-        })
-    if request.method == 'PUT':
-        data = request.get_json() or {}
-        pedido.status = data.get('status', pedido.status)
-        pedido.observacoes = data.get('observacoes', pedido.observacoes)
-        # atualizar itens se enviado
-        if 'itens' in data:
-            pedido.itens.clear()
-            for item in data['itens']:
-                prod = Produto.query.get(item['produto_id'])
+@app.route('/pedidos')
+def listar_pedidos():
+    pedidos = Pedido.query.all()
+    return render_template('pedidos/pedidos.html', pedidos=pedidos)
+
+@app.route('/pedidos/novo', methods=['GET', 'POST'])
+def novo_pedido():
+    produtos = Produto.query.filter_by(ativo=True).all()
+    mesas = Mesa.query.all()
+    caixas = Caixa.query.filter_by(aberto=True).all()
+    if request.method == 'POST':
+        try:
+            mesa_id = request.form.get('mesa_id') or None
+            caixa_id = request.form.get('caixa_id') or None
+            observacoes = request.form.get('observacoes')
+            pedido = Pedido(mesa_id=mesa_id, caixa_id=caixa_id, observacoes=observacoes)
+            db.session.add(pedido)
+            db.session.flush()
+            total = 0
+            # items
+            for i in range(int(request.form.get('item_count',0))):
+                pid = request.form.get(f'produto_{i}')
+                qty = int(request.form.get(f'quantidade_{i}',1))
+                if not pid: continue
+                prod = Produto.query.get(pid)
                 if not prod: continue
-                ip = ItemPedido(
-                    pedido_id=pedido.id,
-                    produto_id=prod.id,
-                    quantidade=item.get('quantidade',1),
-                    preco_unitario=item.get('preco_unitario', prod.preco_venda)
-                )
+                ip = ItemPedido(pedido_id=pedido.id, produto_id=prod.id, quantidade=qty, preco_unitario=prod.preco_venda)
                 db.session.add(ip)
-        pedido.calcular_total()
-        if pedido.status == 'fechado':
-            pedido.fechado_em = datetime.utcnow()
-            # reduzir estoque e registrar movimentaÃ§Ã£o
-            for ip in pedido.itens:
-                prod = Produto.query.get(ip.produto_id)
-                if prod:
-                    prod.quantidade_estoque -= ip.quantidade
-                    mov = Movimentacao(
-                        produto_id=prod.id,
-                        tipo=Movimentacao.TIPO_SAIDA,
-                        quantidade=ip.quantidade,
-                        motivo='venda',
-                        observacoes=f'Pedido {pedido.id}'
-                    )
-                    db.session.add(mov)
-        db.session.commit()
-        return jsonify({'status':'ok'})
-    if request.method == 'DELETE':
+                total += qty * prod.preco_venda
+            pedido.total = total
+            db.session.commit()
+            flash('Pedido criado com sucesso!', 'success')
+            return redirect(url_for('listar_pedidos'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao criar pedido: {str(e)}', 'error')
+    return render_template('pedidos/novo_pedido.html', produtos=produtos, mesas=mesas, caixas=caixas)
+
+@app.route('/pedidos/<int:pedido_id>/editar', methods=['GET', 'POST'])
+def editar_pedido(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    produtos = Produto.query.filter_by(ativo=True).all()
+    mesas = Mesa.query.all()
+    caixas = Caixa.query.all()
+    if request.method == 'POST':
+        try:
+            pedido.mesa_id = request.form.get('mesa_id') or None
+            pedido.caixa_id = request.form.get('caixa_id') or None
+            pedido.status = request.form.get('status', pedido.status)
+            pedido.observacoes = request.form.get('observacoes', pedido.observacoes)
+            # rebuild items
+            pedido.itens.clear()
+            total = 0
+            for i in range(int(request.form.get('item_count',0))):
+                pid = request.form.get(f'produto_{i}')
+                qty = int(request.form.get(f'quantidade_{i}',1))
+                if not pid: continue
+                prod = Produto.query.get(pid)
+                if not prod: continue
+                ip = ItemPedido(pedido_id=pedido.id, produto_id=prod.id, quantidade=qty, preco_unitario=prod.preco_venda)
+                db.session.add(ip)
+                total += qty * prod.preco_venda
+            pedido.total = total
+            if pedido.status == 'fechado' and not pedido.fechado_em:
+                pedido.fechado_em = datetime.utcnow()
+                # reduce stock
+                for ip in pedido.itens:
+                    prod = Produto.query.get(ip.produto_id)
+                    if prod:
+                        prod.quantidade_estoque -= ip.quantidade
+                        mov = Movimentacao(
+                            produto_id=prod.id,
+                            tipo=Movimentacao.TIPO_SAIDA,
+                            quantidade=ip.quantidade,
+                            motivo='venda',
+                            observacoes=f'Pedido {pedido.id}'
+                        )
+                        db.session.add(mov)
+            db.session.commit()
+            flash('Pedido atualizado com sucesso!', 'success')
+            return redirect(url_for('listar_pedidos'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao atualizar pedido: {str(e)}', 'error')
+    return render_template('pedidos/editar_pedido.html', pedido=pedido, produtos=produtos, mesas=mesas, caixas=caixas)
+
+@app.route('/pedidos/<int:pedido_id>/deletar', methods=['POST'])
+def deletar_pedido(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    try:
         db.session.delete(pedido)
         db.session.commit()
-        return ('',204)
+        flash('Pedido excluído.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao excluir pedido: {str(e)}', 'error')
+    return redirect(url_for('listar_pedidos'))
 
-@app.route('/api/vendas', methods=['GET'])
-def api_vendas():
-    """Retorna pedidos fechados como vendas"""
+# ============ ROTAS - VENDAS ============
+
+@app.route('/vendas')
+def listar_vendas():
     vendas = Pedido.query.filter_by(status='fechado').all()
-    return jsonify([{
-        'id': v.id,
-        'total': v.total,
-        'caixa_id': v.caixa_id,
-        'mesa_id': v.mesa_id,
-        'data': v.fechado_em
-    } for v in vendas])
+    return render_template('vendas/vendas.html', vendas=vendas)
 
-@app.route('/api/categorias/json')
-def api_categorias():
-    """API para obter categorias em JSON"""
-    categorias = Categoria.query.all()
-    return jsonify([{
-        'id': c.id,
-        'nome': c.nome,
-        'total_produtos': len(c.produtos)
-    } for c in categorias])
-
-@app.route('/api/estoque/resumo')
-def api_estoque_resumo():
-    """API para obter resumo do estoque"""
-    total_itens = db.session.query(db.func.sum(Produto.quantidade_estoque)).scalar() or 0
-    valor_total = db.session.query(
-        db.func.sum(Produto.quantidade_estoque * Produto.preco_custo)
-    ).scalar() or 0
-    
-    return jsonify({
-        'total_itens': total_itens,
-        'valor_total': round(valor_total, 2),
-        'produtos_em_falta': Produto.query.filter(
-            Produto.quantidade_estoque < Produto.quantidade_minima
-        ).count()
-    })
-
-@app.route('/api/produto/codigo/<codigo>')
-def api_produto_por_codigo(codigo):
-    """API para obter produto por cÃ³digo de barras"""
-    produto = Produto.query.filter_by(codigo=codigo.upper()).first()
-    
-    if not produto:
-        return jsonify({'erro': 'Produto nÃ£o encontrado'}), 404
-    
-    return jsonify({
-        'id': produto.id,
-        'codigo': produto.codigo,
-        'nome': produto.nome,
-        'descricao': produto.descricao,
-        'categoria': produto.categoria.nome,
-        'preco_custo': produto.preco_custo,
-        'preco_venda': produto.preco_venda,
-        'quantidade_estoque': produto.quantidade_estoque,
-        'quantidade_minima': produto.quantidade_minima,
-        'ativo': produto.ativo,
-        'em_falta': produto.em_falta,
-        'lucro_unitario': produto.lucro_unitario,
-        'margem_lucro': produto.margem_lucro
-    })
-
-@app.route('/api/sistema/info')
-def api_sistema_info():
-    """API para obter informaÃ§Ãµes do SystemLR"""
-    return jsonify({
-        'nome': APP_NAME,
-        'versao': APP_VERSION,
-        'dominio': APP_DOMAIN,
-        'desenvolvido_por': 'SystemLR',
-        'ano': datetime.now().year,
-        'banco_de_dados': 'SQLite',
-        'framework': 'Flask'
-    })
 
 # ============ CONTEXT PROCESSORS ============
 
@@ -723,12 +639,12 @@ def inject_user():
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('404.html'), 404
+    return render_template('errors/404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    return render_template('500.html'), 500
+    return render_template('errors/500.html'), 500
 
 # ============ MAIN ============
 

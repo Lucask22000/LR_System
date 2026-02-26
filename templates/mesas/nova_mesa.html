@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Mesa - SystemLR{% endblock %}
+
+{% block content %}
+<h1>Nova Mesa</h1>
+<form method="POST" id="formMesa" onsubmit="return validarFormulario('formMesa')">
+    <div class="form-group">
+        <label for="numero">Número</label>
+        <input type="text" name="numero" id="numero" required class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="capacidade">Capacidade</label>
+        <input type="number" name="capacidade" id="capacidade" value="4" required class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{{ url_for('listar_mesas') }}" class="btn btn-secondary">✕ Cancelar</a>
+</form>
+{% endblock %}
