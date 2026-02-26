@@ -1,20 +1,19 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}Movimentação Rápida - SystemLR{% endblock %}
+{% block title %}Movimentacao Rapida - SystemLR{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Movimentação Rápida</h1>
-    <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">← Voltar</a>
+    <h1>Movimentacao Rapida</h1>
+    <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">Voltar</a>
 </div>
 
-<!-- INFORMAÇÕES DO PRODUTO -->
 <div class="section">
     <h2>{{ produto.nome }}</h2>
-    
+
     <div class="info-cards-row">
         <div class="info-card">
-            <h3>Código</h3>
+            <h3>Codigo</h3>
             <p class="value">{{ produto.codigo }}</p>
         </div>
         <div class="info-card">
@@ -22,7 +21,7 @@
             <p class="value">{{ produto.categoria.nome }}</p>
         </div>
         <div class="info-card">
-            <h3>Preço Venda</h3>
+            <h3>Preco Venda</h3>
             <p class="value">R$ {{ "%.2f"|format(produto.preco_venda) }}</p>
         </div>
         <div class="info-card">
@@ -32,19 +31,18 @@
     </div>
 </div>
 
-<!-- FORMULÁRIO DE MOVIMENTAÇÃO RÁPIDA -->
 <div class="section">
-    <h2>Registrar Movimentação</h2>
-    
+    <h2>Registrar Movimentacao</h2>
+
     <form method="POST" class="form">
         <input type="hidden" name="produto_id" value="{{ produto.id }}">
 
         <div class="form-row">
             <div class="form-group">
-                <label for="tipo">Tipo de Movimentação *</label>
+                <label for="tipo">Tipo de Movimentacao *</label>
                 <select id="tipo" name="tipo" required class="input-select">
-                    <option value="entrada">📥 Entrada</option>
-                    <option value="saida">📤 Saída</option>
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saida</option>
                 </select>
             </div>
 
@@ -54,21 +52,52 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="motivo">Motivo</label>
-            <input type="text" id="motivo" name="motivo" placeholder="Ex: Venda, Compra, Devolução..." class="input-text">
+        <div class="form-group" id="fornecedor-wrapper" style="display:block;">
+            <label for="fornecedor_id">Fornecedor (opcional no recebimento)</label>
+            <select id="fornecedor_id" name="fornecedor_id" class="input-select">
+                <option value="">Sem fornecedor</option>
+                {% for fornecedor in fornecedores %}
+                <option value="{{ fornecedor.id }}">{{ fornecedor.nome }}</option>
+                {% endfor %}
+            </select>
         </div>
 
         <div class="form-group">
-            <label for="observacoes">Observações</label>
-            <textarea id="observacoes" name="observacoes" placeholder="Observações adicionais..." class="input-textarea" rows="3"></textarea>
+            <label for="motivo">Motivo</label>
+            <input type="text" id="motivo" name="motivo" placeholder="Ex: Venda, Compra, Devolucao..." class="input-text">
+        </div>
+
+        <div class="form-group">
+            <label for="observacoes">Observacoes</label>
+            <textarea id="observacoes" name="observacoes" placeholder="Observacoes adicionais..." class="input-textarea" rows="3"></textarea>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">✓ Registrar Movimentação</button>
-            <a href="{{ url_for('scanner') }}" class="btn btn-success">📷 Escanear Outro Código</a>
-            <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">✕ Cancelar</a>
+            <button type="submit" class="btn btn-primary">Registrar movimentacao</button>
+            <a href="{{ url_for('nova_movimentacao') }}" class="btn btn-success">Nova movimentacao</a>
+            <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipo = document.getElementById('tipo');
+    const fornecedorWrapper = document.getElementById('fornecedor-wrapper');
+    const fornecedorSelect = document.getElementById('fornecedor_id');
+
+    function atualizarFornecedor() {
+        const entrada = tipo.value === 'entrada';
+        fornecedorWrapper.style.display = entrada ? 'block' : 'none';
+        if (!entrada) {
+            fornecedorSelect.value = '';
+        }
+    }
+
+    tipo.addEventListener('change', atualizarFornecedor);
+    atualizarFornecedor();
+});
+</script>
 {% endblock %}

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Funcionário - SystemLR{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div style="max-width: 500px; margin: 0 auto;">
+        <h1>Editar Funcionário</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('editar_funcionario', funcionario_id=funcionario.id) }}" class="form">
+            <div class="form-group">
+                <label for="nome">Nome Completo <span class="required">*</span></label>
+                <input type="text" id="nome" name="nome" class="form-control" value="{{ funcionario.nome }}" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ funcionario.email }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Função
+                    {% if funcionario_logado.role != 'admin' %}
+                        <span class="hint">(apenas admin pode alterar)</span>
+                    {% endif %}
+                </label>
+                <select id="role" name="role" class="form-control" 
+                    {% if funcionario_logado.role != 'admin' %}disabled{% endif %}>
+                    <option value="operador" {% if funcionario.role == 'operador' %}selected{% endif %}>Operador</option>
+                    <option value="caixa" {% if funcionario.role == 'caixa' %}selected{% endif %}>Caixa</option>
+                    <option value="gerente" {% if funcionario.role == 'gerente' %}selected{% endif %}>Gerente</option>
+                    {% if funcionario_logado.role == 'admin' %}
+                        <option value="admin" {% if funcionario.role == 'admin' %}selected{% endif %}>Admin</option>
+                    {% endif %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ativo">
+                    <input type="checkbox" id="ativo" name="ativo" {% if funcionario.ativo %}checked{% endif %}>
+                    Funcionário Ativo
+                </label>
+            </div>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+            
+            <h4 style="margin-bottom: 20px;">Alterar Senha (opcional)</h4>
+            
+            <div class="form-group">
+                <label for="nova_senha">Nova Senha</label>
+                <input type="password" id="nova_senha" name="nova_senha" class="form-control" minlength="6" placeholder="Deixe vazio para manter a senha atual">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button type="submit" class="btn btn-success" style="flex: 1;">
+                    ✓ Salvar Alterações
+                </button>
+                <a href="{{ url_for('listar_funcionarios') }}" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        padding: 40px 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .form-container h1 {
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 28px;
+    }
+    
+    .form-container h4 {
+        color: #333;
+        font-size: 16px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .form-group input[type="checkbox"] {
+        margin-right: 8px;
+        cursor: pointer;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .hint {
+        color: #999;
+        font-size: 12px;
+        font-weight: normal;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        font-family: inherit;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .form-control:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+        font-size: 16px;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+{% endblock %}

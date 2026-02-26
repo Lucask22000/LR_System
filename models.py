@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -60,6 +61,7 @@ class Movimentacao(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     produto_id = db.Column(db.Integer, db.ForeignKey('produtos.id'), nullable=False)
+    fornecedor_id = db.Column(db.Integer, db.ForeignKey('fornecedores.id'), nullable=True)
     tipo = db.Column(db.String(20), nullable=False)  # entrada ou saida
     quantidade = db.Column(db.Integer, nullable=False)
     motivo = db.Column(db.String(200))  # venda, compra, devolução, perda, etc
@@ -71,6 +73,22 @@ class Movimentacao(db.Model):
 
 
 # ======= NOVOS MODELOS =======
+
+class Fornecedor(db.Model):
+    __tablename__ = 'fornecedores'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(150), unique=True, nullable=False)
+    contato = db.Column(db.String(120))
+    telefone = db.Column(db.String(30))
+    email = db.Column(db.String(120))
+    ativo = db.Column(db.Boolean, default=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    movimentacoes = db.relationship('Movimentacao', backref='fornecedor', lazy=True)
+
+    def __repr__(self):
+        return f'<Fornecedor {self.nome}>'
 
 class Caixa(db.Model):
     __tablename__ = 'caixas'
@@ -139,3 +157,28 @@ class ItemPedido(db.Model):
 
     def __repr__(self):
         return f'<ItemPedido {self.produto.nome} x{self.quantidade}>'
+
+
+class Funcionario(db.Model):
+    __tablename__ = 'funcionarios'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    senha_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), default='operador')  # admin, gerente, caixa, operador
+    ativo = db.Column(db.Boolean, default=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def set_password(self, senha):
+        """Hash e armazena a senha."""
+        self.senha_hash = generate_password_hash(senha)
+
+    def check_password(self, senha):
+        """Verifica se a senha fornecida corresponde ao hash armazenado."""
+        return check_password_hash(self.senha_hash, senha)
+
+    def __repr__(self):
+        return f'<Funcionario {self.nome} - {self.role}>'
+

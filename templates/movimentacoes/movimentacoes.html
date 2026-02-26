@@ -1,38 +1,42 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}Movimentações - SystemLR{% endblock %}
+{% block title %}Movimentacoes - SystemLR{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Movimentações</h1>
-    <a href="{{ url_for('nova_movimentacao') }}" class="btn btn-primary">➕ Nova Movimentação</a>
+    <h1>Movimentacoes</h1>
+    <a href="{{ url_for('nova_movimentacao') }}" class="btn btn-primary">Nova Movimentacao</a>
 </div>
 
-<!-- FILTROS -->
 <div class="filters-section">
     <form method="GET" class="filters-form">
         <div class="filter-group">
             <select name="produto_id" class="input-select">
                 <option value="">Todos os produtos</option>
                 {% for prod in produtos %}
-                <option value="{{ prod.id }}" {% if produto_selecionado == prod.id %}selected{% endif %}>
-                    {{ prod.nome }}
-                </option>
+                <option value="{{ prod.id }}" {% if produto_selecionado == prod.id %}selected{% endif %}>{{ prod.nome }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="filter-group">
             <select name="tipo" class="input-select">
                 <option value="">Todos os tipos</option>
-                <option value="entrada" {% if tipo_selecionado == 'entrada' %}selected{% endif %}>📥 Entrada</option>
-                <option value="saida" {% if tipo_selecionado == 'saida' %}selected{% endif %}>📤 Saída</option>
+                <option value="entrada" {% if tipo_selecionado == 'entrada' %}selected{% endif %}>Entrada</option>
+                <option value="saida" {% if tipo_selecionado == 'saida' %}selected{% endif %}>Saida</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-secondary">🔍 Filtrar</button>
+        <div class="filter-group">
+            <select name="fornecedor_id" class="input-select">
+                <option value="">Todos os fornecedores</option>
+                {% for forn in fornecedores %}
+                <option value="{{ forn.id }}" {% if fornecedor_selecionado == forn.id %}selected{% endif %}>{{ forn.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">Filtrar</button>
     </form>
 </div>
 
-<!-- LISTA DE MOVIMENTAÇÕES -->
 <div class="table-responsive">
     <table class="table">
         <thead>
@@ -40,6 +44,7 @@
                 <th>Produto</th>
                 <th>Tipo</th>
                 <th>Quantidade</th>
+                <th>Fornecedor</th>
                 <th>Motivo</th>
                 <th>Data</th>
             </tr>
@@ -52,16 +57,17 @@
                 </td>
                 <td data-label="Tipo">
                     <span class="badge {% if mov.tipo == 'entrada' %}badge-success{% else %}badge-danger{% endif %}">
-                        {% if mov.tipo == 'entrada' %}📥 Entrada{% else %}📤 Saída{% endif %}
+                        {{ mov.tipo|capitalize }}
                     </span>
                 </td>
                 <td data-label="Quantidade">{{ mov.quantidade }}</td>
+                <td data-label="Fornecedor">{{ mov.fornecedor.nome if mov.fornecedor else '-' }}</td>
                 <td data-label="Motivo">{{ mov.motivo or '-' }}</td>
                 <td data-label="Data">{{ mov.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="text-center">Nenhuma movimentação encontrada</td>
+                <td colspan="6" class="text-center">Nenhuma movimentacao encontrada</td>
             </tr>
             {% endfor %}
         </tbody>

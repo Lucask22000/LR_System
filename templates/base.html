@@ -16,26 +16,44 @@
             </div>
             <button class="menu-toggle" id="menuToggle">â˜°</button>
             <nav class="navbar-menu" id="navbarMenu">
-    <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+    {% if funcionario_logado %}
+        <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
 
-    <div class="nav-dropdown">
-        <button type="button" class="nav-dropdown-toggle">Vendas</button>
-        <div class="nav-submenu">
-            <a href="{{ url_for('listar_pedidos') }}" class="nav-link nav-sublink">Pedidos</a>
-            <a href="{{ url_for('listar_vendas') }}" class="nav-link nav-sublink">Vendas</a>
+        <div class="nav-dropdown">
+            <button type="button" class="nav-dropdown-toggle">Vendas</button>
+            <div class="nav-submenu">
+                <a href="{{ url_for('listar_pedidos') }}" class="nav-link nav-sublink">Pedidos</a>
+                <a href="{{ url_for('listar_vendas') }}" class="nav-link nav-sublink">Vendas</a>
+            </div>
         </div>
-    </div>
 
-    <div class="nav-dropdown">
-        <button type="button" class="nav-dropdown-toggle">Estoque</button>
-        <div class="nav-submenu">
+        <div class="nav-dropdown">
+            <button type="button" class="nav-dropdown-toggle">Estoque</button>
+            <div class="nav-submenu">
             <a href="{{ url_for('listar_produtos') }}" class="nav-link nav-sublink">Produtos</a>
             <a href="{{ url_for('listar_categorias') }}" class="nav-link nav-sublink">Categorias</a>
+            <a href="{{ url_for('listar_fornecedores') }}" class="nav-link nav-sublink">Fornecedores</a>
             <a href="{{ url_for('listar_movimentacoes') }}" class="nav-link nav-sublink">Movimentações</a>
             <a href="{{ url_for('relatorios') }}" class="nav-link nav-sublink">Relatórios</a>
         </div>
-    </div>
+        </div>
 
+        {% if funcionario_logado.role in ['admin', 'gerente'] %}
+            <a href="{{ url_for('listar_funcionarios') }}" class="nav-link">Funcionários</a>
+        {% endif %}
+
+        <div class="nav-dropdown" style="margin-left: auto;">
+            <button type="button" class="nav-dropdown-toggle" style="background-color: #f0f0f0;">
+                👤 {{ funcionario_logado.nome }}
+            </button>
+            <div class="nav-submenu">
+                <a href="{{ url_for('logout') }}" class="nav-link nav-sublink">Sair</a>
+            </div>
+        </div>
+    {% else %}
+        <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+        <a href="{{ url_for('registro') }}" class="nav-link">Registrar</a>
+    {% endif %}
 </nav>
         </div>
     </header>

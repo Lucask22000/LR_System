@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Funcionário - SystemLR{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div style="max-width: 500px; margin: 0 auto;">
+        <h1>Novo Funcionário</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('criar_funcionario') }}" class="form">
+            <div class="form-group">
+                <label for="nome">Nome Completo <span class="required">*</span></label>
+                <input type="text" id="nome" name="nome" class="form-control" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="senha">Senha <span class="required">*</span></label>
+                <input type="password" id="senha" name="senha" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmacao_senha">Confirmar Senha <span class="required">*</span></label>
+                <input type="password" id="confirmacao_senha" name="confirmacao_senha" class="form-control" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Função <span class="required">*</span></label>
+                <select id="role" name="role" class="form-control" required>
+                    <option value="">Selecione uma função</option>
+                    <option value="operador">Operador</option>
+                    <option value="caixa">Caixa</option>
+                    <option value="gerente">Gerente</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button type="submit" class="btn btn-success" style="flex: 1;">
+                    ✓ Criar Funcionário
+                </button>
+                <a href="{{ url_for('listar_funcionarios') }}" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        padding: 40px 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .form-container h1 {
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 28px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .required {
+        color: #dc3545;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        font-family: inherit;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+        font-size: 16px;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+{% endblock %}

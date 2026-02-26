@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Novo Produto - SystemLR{% endblock %}
 
@@ -10,8 +10,11 @@
 <div class="form-container">
     <form method="POST" class="form">
         <div class="form-group">
-            <label for="codigo">Código *</label>
-            <input type="text" id="codigo" name="codigo" required placeholder="Ex: PROD001" class="input-text">
+            <label for="codigo">Codigo *</label>
+            <div class="barcode-input-group">
+                <input type="text" id="codigo" name="codigo" required placeholder="Ex: PROD001" class="input-text">
+                <button type="button" class="btn btn-secondary barcode-btn js-open-barcode-scanner" data-barcode-target="codigo">Camera</button>
+            </div>
         </div>
 
         <div class="form-group">
@@ -20,7 +23,7 @@
         </div>
 
         <div class="form-group">
-            <label for="descricao">Descrição</label>
+            <label for="descricao">Descricao</label>
             <textarea id="descricao" name="descricao" placeholder="Descrever o produto..." class="input-textarea" rows="4"></textarea>
         </div>
 
@@ -36,12 +39,12 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="preco_custo">Preço de Custo *</label>
+                <label for="preco_custo">Preco de Custo *</label>
                 <input type="number" id="preco_custo" name="preco_custo" step="0.01" required placeholder="0.00" class="input-text">
             </div>
 
             <div class="form-group">
-                <label for="preco_venda">Preço de Venda *</label>
+                <label for="preco_venda">Preco de Venda *</label>
                 <input type="number" id="preco_venda" name="preco_venda" step="0.01" required placeholder="0.00" class="input-text">
             </div>
         </div>
@@ -53,14 +56,14 @@
             </div>
 
             <div class="form-group">
-                <label for="quantidade_minima">Quantidade Mínima</label>
+                <label for="quantidade_minima">Quantidade Minima</label>
                 <input type="number" id="quantidade_minima" name="quantidade_minima" value="5" placeholder="5" class="input-text">
             </div>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">✓ Salvar Produto</button>
-            <a href="{{ url_for('listar_produtos') }}" class="btn btn-secondary">✕ Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar produto</button>
+            <a href="{{ url_for('listar_produtos') }}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>

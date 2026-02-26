@@ -442,6 +442,82 @@ body {
     flex-wrap: wrap;
 }
 
+.barcode-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.barcode-input-group .input-text,
+.barcode-input-group .input-search {
+    flex: 1;
+}
+
+.barcode-btn {
+    white-space: nowrap;
+}
+
+.barcode-scanner-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.barcode-scanner-modal.active {
+    display: flex;
+}
+
+.barcode-scanner-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 560px;
+    overflow: hidden;
+}
+
+.barcode-scanner-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.barcode-scanner-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.barcode-scanner-close {
+    border: none;
+    background: transparent;
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.barcode-scanner-body {
+    padding: 16px;
+}
+
+.barcode-scanner-video {
+    width: 100%;
+    border-radius: 6px;
+    background: #000;
+}
+
+.barcode-scanner-help {
+    margin-top: 10px;
+    color: #555;
+    font-size: 0.9rem;
+}
+
 /* ========================================
    TABELAS - RESPONSIVAS
    ======================================== */

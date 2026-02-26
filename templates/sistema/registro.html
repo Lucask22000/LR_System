@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - SystemLR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .registro-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .registro-header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .registro-header p {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .alerts {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #5568d3;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-secondary {
+            background-color: #999;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #777;
+        }
+        
+        .registro-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .registro-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .registro-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .info-text {
+            background-color: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            font-size: 13px;
+            color: #0c5460;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .registro-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="registro-header">
+            <h1>SystemLR</h1>
+            <p>{% if primeira_vez %}Criar Conta Admin{% else %}Registrar Novo Funcionário{% endif %}</p>
+        </div>
+        
+        {% if primeira_vez %}
+            <div class="info-text">
+                ℹ️ Esta é sua primeira vez. Crie a conta do administrador do sistema.
+            </div>
+        {% endif %}
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('registro') }}">
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" name="nome" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" required minlength="6" placeholder="Mínimo 6 caracteres">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmacao_senha">Confirmar Senha</label>
+                <input type="password" id="confirmacao_senha" name="confirmacao_senha" required minlength="6">
+            </div>
+            
+            {% if not primeira_vez %}
+                <div class="form-group">
+                    <label for="role">Função</label>
+                    <select id="role" name="role" required>
+                        <option value="operador">Operador</option>
+                        <option value="caixa">Caixa</option>
+                        <option value="gerente">Gerente</option>
+                    </select>
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="btn">
+                {% if primeira_vez %}Criar Conta Admin{% else %}Registrar{% endif %}
+            </button>
+            
+            {% if not primeira_vez %}
+                <a href="{{ url_for('listar_funcionarios') }}" style="display: block; text-align: center; text-decoration: none;">
+                    <button type="button" class="btn btn-secondary">Cancelar</button>
+                </a>
+            {% else %}
+                <div class="registro-footer">
+                    <p>Já tem uma conta? <a href="{{ url_for('login') }}">Fazer login</a></p>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

@@ -1,11 +1,10 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}Nova Movimentação - SystemLR{% endblock %}
+{% block title %}Nova Movimentacao - SystemLR{% endblock %}
 
 {% block content %}
 <div class="page-header">
-    <h1>Nova Movimentação</h1>
-    <a href="{{ url_for('scanner') }}" class="btn btn-success">📷 Scanner de Código</a>
+    <h1>Nova Movimentacao</h1>
 </div>
 
 <div class="form-container">
@@ -21,11 +20,21 @@
         </div>
 
         <div class="form-group">
-            <label for="tipo">Tipo de Movimentação *</label>
+            <label for="tipo">Tipo de Movimentacao *</label>
             <select id="tipo" name="tipo" required class="input-select">
                 <option value="">Selecione um tipo</option>
-                <option value="entrada">📥 Entrada</option>
-                <option value="saida">📤 Saída</option>
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saida</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="fornecedor-wrapper" style="display:none;">
+            <label for="fornecedor_id">Fornecedor (opcional no recebimento)</label>
+            <select id="fornecedor_id" name="fornecedor_id" class="input-select">
+                <option value="">Sem fornecedor</option>
+                {% for fornecedor in fornecedores %}
+                <option value="{{ fornecedor.id }}">{{ fornecedor.nome }}</option>
+                {% endfor %}
             </select>
         </div>
 
@@ -36,18 +45,39 @@
 
         <div class="form-group">
             <label for="motivo">Motivo</label>
-            <input type="text" id="motivo" name="motivo" placeholder="Ex: Venda, Compra, Devolução, Perda..." class="input-text">
+            <input type="text" id="motivo" name="motivo" placeholder="Ex: Venda, Compra, Devolucao, Perda..." class="input-text">
         </div>
 
         <div class="form-group">
-            <label for="observacoes">Observações</label>
-            <textarea id="observacoes" name="observacoes" placeholder="Observações adicionais..." class="input-textarea" rows="4"></textarea>
+            <label for="observacoes">Observacoes</label>
+            <textarea id="observacoes" name="observacoes" placeholder="Observacoes adicionais..." class="input-textarea" rows="4"></textarea>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">✓ Registrar Movimentação</button>
-            <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">✕ Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar movimentacao</button>
+            <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipo = document.getElementById('tipo');
+    const fornecedorWrapper = document.getElementById('fornecedor-wrapper');
+    const fornecedorSelect = document.getElementById('fornecedor_id');
+
+    function atualizarFornecedor() {
+        const entrada = tipo.value === 'entrada';
+        fornecedorWrapper.style.display = entrada ? 'block' : 'none';
+        if (!entrada) {
+            fornecedorSelect.value = '';
+        }
+    }
+
+    tipo.addEventListener('change', atualizarFornecedor);
+    atualizarFornecedor();
+});
+</script>
 {% endblock %}
