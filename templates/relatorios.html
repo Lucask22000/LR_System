@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Relatórios</h1>
+</div>
+
+<!-- RESUMO GERAL -->
+<div class="cards-container">
+    <div class="card card-primary">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+            <h3>Total de Produtos</h3>
+            <p class="card-value">{{ total_produtos }}</p>
+        </div>
+    </div>
+
+    <div class="card card-success">
+        <div class="card-icon">✓</div>
+        <div class="card-content">
+            <h3>Produtos Ativos</h3>
+            <p class="card-value">{{ produtos_ativos }}</p>
+        </div>
+    </div>
+
+    <div class="card card-danger">
+        <div class="card-icon">✗</div>
+        <div class="card-content">
+            <h3>Produtos Inativos</h3>
+            <p class="card-value">{{ produtos_inativos }}</p>
+        </div>
+    </div>
+
+    <div class="card card-info">
+        <div class="card-icon">💰</div>
+        <div class="card-content">
+            <h3>Valor Total de Estoque</h3>
+            <p class="card-value">R$ {{ valor_total_estoque }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- ALERTAS - PRODUTOS EM FALTA -->
+{% if produtos_em_falta %}
+<div class="section">
+    <h2>⚠️ Produtos em Falta</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Estoque Atual</th>
+                    <th>Estoque Mínimo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in produtos_em_falta %}
+                <tr class="row-warning">
+                    <td data-label="Produto">
+                        <a href="{{ url_for('visualizar_produto', produto_id=prod.id) }}">{{ prod.nome }}</a>
+                    </td>
+                    <td data-label="Categoria">{{ prod.categoria.nome }}</td>
+                    <td data-label="Atual">{{ prod.quantidade_estoque }}</td>
+                    <td data-label="Mínimo">{{ prod.quantidade_minima }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- PRODUTOS COM MAIOR VALOR EM ESTOQUE -->
+{% if produtos_maior_valor %}
+<div class="section">
+    <h2>💰 Produtos com Maior Valor em Estoque</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Preço Unit.</th>
+                    <th>Valor Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod, valor in produtos_maior_valor %}
+                <tr>
+                    <td data-label="Produto">
+                        <a href="{{ url_for('visualizar_produto', produto_id=prod.id) }}">{{ prod.nome }}</a>
+                    </td>
+                    <td data-label="Quantidade">{{ prod.quantidade_estoque }}</td>
+                    <td data-label="Preço">R$ {{ "%.2f"|format(prod.preco_custo) }}</td>
+                    <td data-label="Total">R$ {{ "%.2f"|format(valor) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ESTATÍSTICAS -->
+<div class="section">
+    <h2>Estatísticas</h2>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <h4>Movimentações no Mês</h4>
+            <p class="stat-value">{{ movimentacoes_mes }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

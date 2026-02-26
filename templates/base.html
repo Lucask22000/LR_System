@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SystemLR - Gestão de Estoque{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- HEADER/NAVBAR -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1><i class="icon">📦</i> SystemLR</h1>
+            </div>
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <nav class="navbar-menu" id="navbarMenu">
+                <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+                <span class="nav-section-title">Vendas</span>
+                <a href="{{ url_for('api_documentation') }}" class="nav-link">APIs / Pedidos</a>
+                <a href="{{ url_for('api_vendas') }}" class="nav-link">Vendas</a>
+                <span class="nav-section-title">Estoque</span>
+                <a href="{{ url_for('listar_produtos') }}" class="nav-link">Produtos</a>
+                <a href="{{ url_for('listar_categorias') }}" class="nav-link">Categorias</a>
+                <a href="{{ url_for('listar_movimentacoes') }}" class="nav-link">Movimentações</a>
+                <a href="{{ url_for('relatorios') }}" class="nav-link">Relatórios</a>
+                <a href="{{ url_for('scanner') }}" class="nav-link">📷 Scanner</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span class="close-alert" onclick="this.parentElement.style.display='none';">&times;</span>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- PAGE CONTENT -->
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>&copy; {{ ano_atual }} SystemLR - Gestão de Estoque. Visite <strong>systemlr.com</strong></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ produto.nome }} - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ produto.nome }}</h1>
+    <div class="header-actions">
+        <a href="{{ url_for('editar_produto', produto_id=produto.id) }}" class="btn btn-warning">✏️ Editar</a>
+        <a href="{{ url_for('listar_produtos') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+</div>
+
+<!-- INFORMAÇÕES PRINCIPAIS -->
+<div class="info-cards-row">
+    <div class="info-card">
+        <h3>Código</h3>
+        <p class="value">{{ produto.codigo }}</p>
+    </div>
+    <div class="info-card">
+        <h3>Categoria</h3>
+        <p class="value">{{ produto.categoria.nome }}</p>
+    </div>
+    <div class="info-card">
+        <h3>Preço de Custo</h3>
+        <p class="value">R$ {{ "%.2f"|format(produto.preco_custo) }}</p>
+    </div>
+    <div class="info-card">
+        <h3>Preço de Venda</h3>
+        <p class="value">R$ {{ "%.2f"|format(produto.preco_venda) }}</p>
+    </div>
+</div>
+
+<!-- INFORMAÇÕES DE ESTOQUE -->
+<div class="info-cards-row">
+    <div class="info-card {% if produto.em_falta %}card-warning{% endif %}">
+        <h3>Estoque Atual</h3>
+        <p class="value">{{ produto.quantidade_estoque }}</p>
+        {% if produto.em_falta %}
+        <p class="alert-text">⚠️ Abaixo do mínimo!</p>
+        {% endif %}
+    </div>
+    <div class="info-card">
+        <h3>Estoque Mínimo</h3>
+        <p class="value">{{ produto.quantidade_minima }}</p>
+    </div>
+    <div class="info-card">
+        <h3>Lucro Unitário</h3>
+        <p class="value">R$ {{ "%.2f"|format(produto.lucro_unitario) }}</p>
+    </div>
+    <div class="info-card">
+        <h3>Margem de Lucro</h3>
+        <p class="value">{{ "%.2f"|format(produto.margem_lucro) }}%</p>
+    </div>
+</div>
+
+<!-- DESCRIÇÃO -->
+{% if produto.descricao %}
+<div class="section">
+    <h2>Descrição</h2>
+    <p>{{ produto.descricao }}</p>
+</div>
+{% endif %}
+
+<!-- ÚLTIMAS MOVIMENTAÇÕES -->
+<div class="section">
+    <h2>Últimas Movimentações</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Motivo</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimentacoes %}
+                <tr>
+                    <td data-label="Tipo">
+                        <span class="badge {% if mov.tipo == 'entrada' %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if mov.tipo == 'entrada' %}📥 Entrada{% else %}📤 Saída{% endif %}
+                        </span>
+                    </td>
+                    <td data-label="Quantidade">{{ mov.quantidade }}</td>
+                    <td data-label="Motivo">{{ mov.motivo or '-' }}</td>
+                    <td data-label="Data">{{ mov.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center">Nenhuma movimentação encontrada</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- AÇÕES -->
+<div class="action-buttons">
+    <a href="{{ url_for('editar_produto', produto_id=produto.id) }}" class="btn btn-warning">✏️ Editar Produto</a>
+    <a href="{{ url_for('listar_produtos') }}" class="btn btn-secondary">← Voltar para Produtos</a>
+</div>
+{% endblock %}

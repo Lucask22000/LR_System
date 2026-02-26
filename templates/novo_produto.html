@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Novo Produto - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Novo Produto</h1>
+</div>
+
+<div class="form-container">
+    <form method="POST" class="form">
+        <div class="form-group">
+            <label for="codigo">Código *</label>
+            <input type="text" id="codigo" name="codigo" required placeholder="Ex: PROD001" class="input-text">
+        </div>
+
+        <div class="form-group">
+            <label for="nome">Nome do Produto *</label>
+            <input type="text" id="nome" name="nome" required placeholder="Ex: Refrigerante 2L" class="input-text">
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <textarea id="descricao" name="descricao" placeholder="Descrever o produto..." class="input-textarea" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="categoria_id">Categoria *</label>
+            <select id="categoria_id" name="categoria_id" required class="input-select">
+                <option value="">Selecione uma categoria</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}">{{ cat.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="preco_custo">Preço de Custo *</label>
+                <input type="number" id="preco_custo" name="preco_custo" step="0.01" required placeholder="0.00" class="input-text">
+            </div>
+
+            <div class="form-group">
+                <label for="preco_venda">Preço de Venda *</label>
+                <input type="number" id="preco_venda" name="preco_venda" step="0.01" required placeholder="0.00" class="input-text">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="quantidade_estoque">Quantidade Inicial</label>
+                <input type="number" id="quantidade_estoque" name="quantidade_estoque" value="0" placeholder="0" class="input-text">
+            </div>
+
+            <div class="form-group">
+                <label for="quantidade_minima">Quantidade Mínima</label>
+                <input type="number" id="quantidade_minima" name="quantidade_minima" value="5" placeholder="5" class="input-text">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">✓ Salvar Produto</button>
+            <a href="{{ url_for('listar_produtos') }}" class="btn btn-secondary">✕ Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

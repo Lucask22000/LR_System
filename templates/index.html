@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+</div>
+
+<!-- CARDS RESUMO -->
+<div class="cards-container">
+    <div class="card card-primary">
+        <div class="card-icon">📦</div>
+        <div class="card-content">
+            <h3>Total de Produtos</h3>
+            <p class="card-value">{{ total_produtos }}</p>
+        </div>
+    </div>
+
+    <div class="card card-warning">
+        <div class="card-icon">⚠️</div>
+        <div class="card-content">
+            <h3>Produtos em Falta</h3>
+            <p class="card-value">{{ produtos_em_falta }}</p>
+        </div>
+    </div>
+
+    <div class="card card-success">
+        <div class="card-icon">💰</div>
+        <div class="card-content">
+            <h3>Valor Total de Estoque</h3>
+            <p class="card-value">R$ {{ valor_total_estoque }}</p>
+        </div>
+    </div>
+
+    <div class="card card-info">
+        <div class="card-icon">🔔</div>
+        <div class="card-content">
+            <h3>Alertas Ativos</h3>
+            <p class="card-value">{{ total_alertas }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- AÇÕES RÁPIDAS -->
+<div class="action-buttons">
+    <a href="{{ url_for('novo_produto') }}" class="btn btn-primary">➕ Novo Produto</a>
+    <a href="{{ url_for('nova_categoria') }}" class="btn btn-secondary">➕ Nova Categoria</a>
+    <a href="{{ url_for('nova_movimentacao') }}" class="btn btn-success">➕ Nova Movimentação</a>
+    <a href="{{ url_for('relatorios') }}" class="btn btn-info">📊 Ver Relatórios</a>
+</div>
+
+<!-- ÚLTIMAS MOVIMENTAÇÕES -->
+<div class="section">
+    <h2>Últimas Movimentações</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Qtd</th>
+                    <th>Motivo</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimentacoes_recentes %}
+                <tr>
+                    <td data-label="Produto">{{ mov.produto.nome }}</td>
+                    <td data-label="Tipo">
+                        <span class="badge {% if mov.tipo == 'entrada' %}badge-success{% else %}badge-danger{% endif %}">
+                            {% if mov.tipo == 'entrada' %}📥 Entrada{% else %}📤 Saída{% endif %}
+                        </span>
+                    </td>
+                    <td data-label="Qtd">{{ mov.quantidade }}</td>
+                    <td data-label="Motivo">{{ mov.motivo or '-' }}</td>
+                    <td data-label="Data">{{ mov.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">Nenhuma movimentação encontrada</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-outline">Ver Todas as Movimentações</a>
+</div>
+{% endblock %}

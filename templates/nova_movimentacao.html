@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Movimentação - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Nova Movimentação</h1>
+    <a href="{{ url_for('scanner') }}" class="btn btn-success">📷 Scanner de Código</a>
+</div>
+
+<div class="form-container">
+    <form method="POST" class="form">
+        <div class="form-group">
+            <label for="produto_id">Produto *</label>
+            <select id="produto_id" name="produto_id" required class="input-select">
+                <option value="">Selecione um produto</option>
+                {% for prod in produtos %}
+                <option value="{{ prod.id }}">{{ prod.nome }} (Estoque: {{ prod.quantidade_estoque }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tipo">Tipo de Movimentação *</label>
+            <select id="tipo" name="tipo" required class="input-select">
+                <option value="">Selecione um tipo</option>
+                <option value="entrada">📥 Entrada</option>
+                <option value="saida">📤 Saída</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="quantidade">Quantidade *</label>
+            <input type="number" id="quantidade" name="quantidade" required min="1" placeholder="0" class="input-text">
+        </div>
+
+        <div class="form-group">
+            <label for="motivo">Motivo</label>
+            <input type="text" id="motivo" name="motivo" placeholder="Ex: Venda, Compra, Devolução, Perda..." class="input-text">
+        </div>
+
+        <div class="form-group">
+            <label for="observacoes">Observações</label>
+            <textarea id="observacoes" name="observacoes" placeholder="Observações adicionais..." class="input-textarea" rows="4"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">✓ Registrar Movimentação</button>
+            <a href="{{ url_for('listar_movimentacoes') }}" class="btn btn-secondary">✕ Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Scanner de Código de Barras - SystemLR{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scanner-container {
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    #video {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .scanner-info {
+        background: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .scanner-result {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: var(--shadow);
+    }
+
+    .product-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+    }
+
+    .product-detail {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .product-detail label {
+        font-weight: bold;
+        color: var(--primary);
+        font-size: 0.85em;
+    }
+
+    .product-detail p {
+        margin: 5px 0 0 0;
+        font-size: 1.1em;
+    }
+
+    .scanner-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .controls-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+    }
+
+    .control-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .control-group label {
+        font-weight: 500;
+    }
+
+    #barcodeInput {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .scanner-status {
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        display: none;
+    }
+
+    .scanner-status.active {
+        display: block;
+    }
+
+    .scanner-status.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .scanner-status.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .canvas-preview {
+        display: none;
+        margin-top: 15px;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+        .control-group {
+            flex-direction: column;
+        }
+
+        #barcodeInput {
+            min-width: unset;
+        }
+
+        .scanner-buttons {
+            flex-direction: column;
+        }
+
+        .scanner-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Scanner de Código de Barras</h1>
+    <a href="{{ url_for('nova_movimentacao') }}" class="btn btn-secondary">← Voltar</a>
+</div>
+
+<!-- STATUS -->
+<div class="scanner-status" id="scannerStatus"></div>
+
+<!-- CONTROLES -->
+<div class="controls-section">
+    <div class="control-group">
+        <label for="barcodeInput">Código de Barras:</label>
+        <input type="text" id="barcodeInput" class="input-search" 
+               placeholder="Digite ou escaneie o código..." autofocus>
+        <button type="button" class="btn btn-primary" id="searchBtn">🔍 Buscar</button>
+    </div>
+</div>
+
+<!-- CÂMERA PARA SCANNER -->
+<div class="section">
+    <h2>Câmera para Leitura</h2>
+    <div class="control-group">
+        <button type="button" class="btn btn-success" id="startCameraBtn">📷 Ativar Câmera</button>
+        <button type="button" class="btn btn-danger" id="stopCameraBtn" style="display:none;">🛑 Desativar Câmera</button>
+    </div>
+    
+    <div class="scanner-container" id="scannerContainer" style="display:none;">
+        <video id="video" playsinline></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <div class="scanner-info">
+            <p>📍 Aponte a câmera para o código de barras</p>
+        </div>
+    </div>
+</div>
+
+<!-- RESULTADO DA BUSCA -->
+<div class="scanner-result" id="productResult" style="display:none;">
+    <h3>Produto Encontrado</h3>
+    
+    <div id="productDetails"></div>
+    
+    <div class="scanner-buttons">
+        <a href="#" id="addMovementBtn" class="btn btn-success">➕ Registrar Movimentação</a>
+        <button type="button" class="btn btn-secondary" onclick="this.closest('.scanner-result').style.display='none'; document.getElementById('barcodeInput').value=''; document.getElementById('barcodeInput').focus();">🔄 Novo Código</button>
+    </div>
+</div>
+
+<!-- MENSAGEM VAZIO -->
+<div class="section" id="emptyMessage">
+    <p class="text-center">Digite ou escaneie um código de barras para começar...</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+
+<script>
+    let currentProductId = null;
+    let cameraActive = false;
+
+    // Elementos do DOM
+    const barcodeInput = document.getElementById('barcodeInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const startCameraBtn = document.getElementById('startCameraBtn');
+    const stopCameraBtn = document.getElementById('stopCameraBtn');
+    const scannerContainer = document.getElementById('scannerContainer');
+    const productResult = document.getElementById('productResult');
+    const productDetails = document.getElementById('productDetails');
+    const statusDiv = document.getElementById('scannerStatus');
+    const emptyMessage = document.getElementById('emptyMessage');
+
+    // Buscar produto por código de barras
+    async function searchProduct(code) {
+        if (!code) return;
+
+        try {
+            showStatus('Buscando produto...', 'info');
+            const response = await fetch(`/api/produto/codigo/${encodeURIComponent(code)}`);
+            
+            if (!response.ok) {
+                showStatus('Produto não encontrado', 'error');
+                return;
+            }
+
+            const product = await response.json();
+            displayProduct(product);
+        } catch (error) {
+            console.error('Erro ao buscar produto:', error);
+            showStatus('Erro ao buscar produto', 'error');
+        }
+    }
+
+    // Exibir informações do produto
+    function displayProduct(product) {
+        currentProductId = product.id;
+        
+        productDetails.innerHTML = `
+            <div class="product-info">
+                <div class="product-detail">
+                    <label>Código</label>
+                    <p>${product.codigo}</p>
+                </div>
+                <div class="product-detail">
+                    <label>Nome</label>
+                    <p>${product.nome}</p>
+                </div>
+                <div class="product-detail">
+                    <label>Categoria</label>
+                    <p>${product.categoria}</p>
+                </div>
+                <div class="product-detail">
+                    <label>Preço Venda</label>
+                    <p>R$ ${parseFloat(product.preco_venda).toFixed(2)}</p>
+                </div>
+                <div class="product-detail">
+                    <label>Estoque</label>
+                    <p>${product.quantidade_estoque}</p>
+                </div>
+                <div class="product-detail">
+                    <label>Status</label>
+                    <p>${product.ativo ? '✓ Ativo' : '✗ Inativo'}</p>
+                </div>
+            </div>
+        `;
+
+        // Atualizar botão de movimentação
+        document.getElementById('addMovementBtn').href = `/movimentacoes/rapido/${product.id}`;
+        
+        productResult.style.display = 'block';
+        emptyMessage.style.display = 'none';
+        showStatus('Produto encontrado com sucesso!', 'success');
+    }
+
+    // Mostrar mensagens de status
+    function showStatus(message, type) {
+        statusDiv.textContent = message;
+        statusDiv.className = `scanner-status active ${type}`;
+        
+        if (type !== 'info') {
+            setTimeout(() => {
+                statusDiv.classList.remove('active');
+            }, 3000);
+        }
+    }
+
+    // Ativar câmera e scanner
+    async function startCamera() {
+        try {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+
+            video.srcObject = stream;
+            video.play();
+
+            scannerContainer.style.display = 'block';
+            startCameraBtn.style.display = 'none';
+            stopCameraBtn.style.display = 'inline-block';
+            cameraActive = true;
+
+            // Iniciar Quagga para detecção de código de barras
+            Quagga.init({
+                inputStream: {
+                    name: 'Live',
+                    type: 'LiveStream',
+                    target: '#video',
+                    constraints: {
+                        facingMode: 'environment'
+                    }
+                },
+                decoder: {
+                    readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'upc_reader', 'upc_e_reader']
+                }
+            }, (err) => {
+                if (err) {
+                    console.error('Erro ao iniciar Quagga:', err);
+                    showStatus('Erro ao acessar câmera', 'error');
+                    stopCamera();
+                    return;
+                }
+
+                Quagga.start();
+                showStatus('Câmera ativada! Aponte o código de barras...', 'info');
+            });
+
+            // Detectar código de barras
+            Quagga.onDetected((result) => {
+                if (result.codeResult && result.codeResult.code) {
+                    const code = result.codeResult.code;
+                    barcodeInput.value = code;
+                    searchProduct(code);
+                    stopCamera();
+                }
+            });
+
+        } catch (error) {
+            console.error('Erro ao acessar câmera:', error);
+            showStatus('Impossível acessar a câmera. Verifique as permissões.', 'error');
+        }
+    }
+
+    // Parar câmera e scanner
+    function stopCamera() {
+        try {
+            Quagga.stop();
+            const video = document.getElementById('video');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            scannerContainer.style.display = 'none';
+            startCameraBtn.style.display = 'inline-block';
+            stopCameraBtn.style.display = 'none';
+            cameraActive = false;
+            statusDiv.classList.remove('active');
+        } catch (error) {
+            console.error('Erro ao parar câmera:', error);
+        }
+    }
+
+    // Event listeners
+    searchBtn.addEventListener('click', () => {
+        const code = barcodeInput.value.trim();
+        if (code) {
+            searchProduct(code);
+        }
+    });
+
+    barcodeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const code = barcodeInput.value.trim();
+            if (code) {
+                searchProduct(code);
+            }
+        }
+    });
+
+    startCameraBtn.addEventListener('click', startCamera);
+    stopCameraBtn.addEventListener('click', stopCamera);
+
+    // Limpar ao deixar a página
+    window.addEventListener('beforeunload', () => {
+        if (cameraActive) {
+            stopCamera();
+        }
+    });
+
+    // Foco no input ao carregar
+    barcodeInput.focus();
+</script>
+{% endblock %}

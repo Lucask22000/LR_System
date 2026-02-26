@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Categorias - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Categorias</h1>
+    <a href="{{ url_for('nova_categoria') }}" class="btn btn-primary">➕ Nova Categoria</a>
+</div>
+
+<!-- LISTA DE CATEGORIAS -->
+<div class="grid-container">
+    {% for categoria in categorias %}
+    <div class="card-category">
+        <div class="card-category-header">
+            <h3>{{ categoria.nome }}</h3>
+            <span class="badge">{{ categoria.produtos|length }} produtos</span>
+        </div>
+        <p class="card-category-desc">{{ categoria.descricao or 'Sem descrição' }}</p>
+        <div class="card-category-actions">
+            <a href="{{ url_for('editar_categoria', categoria_id=categoria.id) }}" class="btn-small btn-warning">✏️ Editar</a>
+            <form method="POST" action="{{ url_for('deletar_categoria', categoria_id=categoria.id) }}" style="display:inline;">
+                <button type="submit" class="btn-small btn-danger" onclick="return confirm('Tem certeza? Todos os produtos desta categoria serão removidos!')">🗑️ Deletar</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="section">
+        <p class="text-center">Nenhuma categoria cadastrada</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

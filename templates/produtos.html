@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Produtos - SystemLR{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Produtos</h1>
+    <a href="{{ url_for('novo_produto') }}" class="btn btn-primary">➕ Novo Produto</a>
+</div>
+
+<!-- FILTROS -->
+<div class="filters-section">
+    <form method="GET" class="filters-form">
+        <div class="filter-group">
+            <input type="text" name="busca" placeholder="🔍 Buscar por nome ou código..." 
+                   value="{{ busca }}" class="input-search">
+        </div>
+        <div class="filter-group">
+            <select name="categoria_id" class="input-select">
+                <option value="">Todas as categorias</option>
+                {% for cat in categorias %}
+                <option value="{{ cat.id }}" {% if categoria_selecionada == cat.id %}selected{% endif %}>
+                    {{ cat.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">🔍 Filtrar</button>
+    </form>
+</div>
+
+<!-- LISTA DE PRODUTOS -->
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço Venda</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr class="{% if produto.em_falta %}row-warning{% endif %}">
+                <td data-label="Código">{{ produto.codigo }}</td>
+                <td data-label="Nome">{{ produto.nome }}</td>
+                <td data-label="Categoria">{{ produto.categoria.nome }}</td>
+                <td data-label="Preço">R$ {{ "%.2f"|format(produto.preco_venda) }}</td>
+                <td data-label="Estoque">
+                    {{ produto.quantidade_estoque }}
+                    {% if produto.em_falta %}<span class="icon-warning">⚠️</span>{% endif %}
+                </td>
+                <td data-label="Status">
+                    {% if produto.ativo %}
+                        <span class="badge badge-success">✓ Ativo</span>
+                    {% else %}
+                        <span class="badge badge-danger">✗ Inativo</span>
+                    {% endif %}
+                </td>
+                <td data-label="Ações" class="actions-cell">
+                    <a href="{{ url_for('visualizar_produto', produto_id=produto.id) }}" class="btn-small btn-info">👁️</a>
+                    <a href="{{ url_for('editar_produto', produto_id=produto.id) }}" class="btn-small btn-warning">✏️</a>
+                    <form method="POST" action="{{ url_for('deletar_produto', produto_id=produto.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-small btn-danger" onclick="return confirm('Tem certeza?')">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">Nenhum produto encontrado</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
